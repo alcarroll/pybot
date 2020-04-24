@@ -1,10 +1,9 @@
 # bot.py
-import os
-import random
+import os, random, asyncio, discord
 
-import discord
 from discord.ext import commands
 from dotenv import load_dotenv
+from discord.ext.commands import clean_content
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
@@ -41,6 +40,7 @@ async def roll(ctx, number_of_dice: int, number_of_sides: int):
     
     ]
     await ctx.send(', '.join(dice))
+
 
 @bot.command(name='8ball', help='Ask the magic 8ball a question.')
 async def eightball(ctx, *, ballInput):
