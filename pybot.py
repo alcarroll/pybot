@@ -1,5 +1,5 @@
 # bot.py
-import os, random, asyncio, discord
+import os, random, asyncio, discord, csv
 
 from discord.ext import commands
 from dotenv import load_dotenv
@@ -73,6 +73,29 @@ async def eightball(ctx, *, ballInput):
                                     "Very doubtful "]) + ":8ball:"
         emb = (discord.Embed(title="Question: {}".format(ballInput), colour=0xE80303, description=prediction))
     emb.set_author(name='Magic 8 ball', icon_url='https://www.horoscope.com/images-US/games/game-magic-8-ball-no-text.png')
+    await ctx.send(embed=emb)
+
+
+@bot.command(name='gamble', help='try your luck')
+async def gamble(ctx):
+    gambleuser = (ctx.message.author.name)
+    with open('worth.csv') as csvfile:
+        reader = csv.reader(csvfile)
+        for row in reader:
+            csvname = str(row[0])
+            csvworth = int(row[1])
+            if csvname == (gambleuser):
+                gambler = csvname
+                worth = csvworth
+
+    gambleresult = random.choice(["(Win)", "(Lose)"])
+    gamblevalue = random.randint(1, 1000)
+    if gambleresult == "(Win)":
+        worth = (worth + gamblevalue)
+        emb = (discord.Embed(title= str(gambler) + " gambles and wins: $" + str(gamblevalue), description="They now have: $" + str(worth), colour=0xE80303))
+    else:
+        worth = (worth - gamblevalue)
+        emb = (discord.Embed(title= str(gambler) + " gambles and loses : $" + str(gamblevalue), description="They now have: $ " + str(worth), colour=0xE80303))
     await ctx.send(embed=emb)
 
 bot.run(TOKEN)
