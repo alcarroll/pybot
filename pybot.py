@@ -1,5 +1,5 @@
 # bot.py
-import os, random, asyncio, discord, csv
+import os, random, asyncio, discord, pymysql
 
 from discord.ext import commands
 from dotenv import load_dotenv
@@ -7,7 +7,11 @@ from discord.ext.commands import clean_content
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
-GUILD = os.getenv('DISCORT_GUILD')
+GUILD = os.getenv('DISCORD_GUILD')
+PB_DBH = os.getenv('PYBOT_DB_HOST')
+PB_DBU = os.getenv('PYBOT_DB_USER')
+PB_DBP = os.getenv('PYBOT_DB_PASS')
+PB_DBN = os.getenv('PYBOT_DB_NAME')
 
 client = discord.Client()
 
@@ -41,7 +45,6 @@ async def roll(ctx, number_of_dice: int, number_of_sides: int):
     ]
     await ctx.send(', '.join(dice))
 
-
 @bot.command(name='8ball', help='Ask the magic 8ball a question.')
 async def eightball(ctx, *, ballInput):
     choiceType = random.choice(["(Affirmative)", "(Non-committal)", "(Negative)"])
@@ -72,30 +75,56 @@ async def eightball(ctx, *, ballInput):
                                     "Outlook not so good ",
                                     "Very doubtful "]) + ":8ball:"
         emb = (discord.Embed(title="Question: {}".format(ballInput), colour=0xE80303, description=prediction))
+        # Only made a couple of insignificant tweaks so leaving original author in
     emb.set_author(name='Magic 8 ball', icon_url='https://www.horoscope.com/images-US/games/game-magic-8-ball-no-text.png')
     await ctx.send(embed=emb)
 
-
-@bot.command(name='gamble', help='try your luck')
+@bot.command(name='gamble', help='Try your luck!')
 async def gamble(ctx):
     gambleuser = (ctx.message.author.name)
-    with open('worth.csv') as csvfile:
-        reader = csv.reader(csvfile)
-        for row in reader:
-            csvname = str(row[0])
-            csvworth = int(row[1])
-            if csvname == (gambleuser):
-                gambler = csvname
-                worth = csvworth
-
+    db = pymysql.connect( PB_DBH , PB_DBU , PB_DBP , PB_DBN )
+    cursor = db.cursor()
+    cursor.execute("SELECT MAX(worth) FROM users WHERE name LIKE %s", "%" + (str(gambleuser, )) + "%")
+    row = cursor.fetchone()
+    worth = row[0]
     gambleresult = random.choice(["(Win)", "(Lose)"])
     gamblevalue = random.randint(1, 1000)
+
     if gambleresult == "(Win)":
         worth = (worth + gamblevalue)
-        emb = (discord.Embed(title= str(gambler) + " gambles and wins: $" + str(gamblevalue), description="They now have: $" + str(worth), colour=0xE80303))
+        cursor.execute("UPDATE users SET worth='%s' WHERE name='%s' " % (worth, gambleuser))
+        db.commit()
+        # This cursor.execute can probably be removed. just leaving it                                                                                                                                       # until I'm more confident that things are working
+        # just use the existing worth value without pulling it from the db again
+        cursor.execute("SELECT MAX(worth) FROM users WHERE name LIKE %s", "%" + (str(gambleuser, )) + "%")
+        row = cursor.fetchone()
+        worth = row[0]
+        emb = (discord.Embed(title=str(gambleuser) + " gambles and wins: $" + str(gamblevalue),
+                         description="They now have: $" + str(worth), colour=0xE80303))
     else:
         worth = (worth - gamblevalue)
-        emb = (discord.Embed(title= str(gambler) + " gambles and loses : $" + str(gamblevalue), description="They now have: $ " + str(worth), colour=0xE80303))
+        cursor.execute("UPDATE users SET worth='%s' WHERE name='%s' " % (worth, gambleuser))
+        db.commit()
+        # This cursor.execute can probably be removed. just leaving it 
+        # until I'm more confident that things are working
+        # just use the existing worth value without pulling it from the db again
+        cursor.execute("SELECT MAX(worth) FROM users WHERE name LIKE %s", "%" + (str(gambleuser, )) + "%")
+        row = cursor.fetchone()
+        worth = row[0]
+        emb = (discord.Embed(title=str(gambleuser) + " gambles and loses : $" + str(gamblevalue),
+                         description="They now have: $ " + str(worth), colour=0xE80303))
+
     await ctx.send(embed=emb)
+
+# This outputs the correct info but is terrible and needs to be improved
+@bot.command(name='networth', help='See how much cash everyone has')
+async def networth(ctx):
+    db = pymysql.connect( PB_DBH , PB_DBU , PB_DBP , PB_DBN )
+    cursor = db.cursor()
+    cursor.execute("SELECT name,worth FROM users")
+    userlist = cursor.fetchall()
+    for row in userlist:
+        emb = discord.Embed(title=(row[0]), description=(row[1]), colour=0xE80303)
+        await ctx.send(embed=emb)
 
 bot.run(TOKEN)
