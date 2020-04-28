@@ -90,11 +90,15 @@ async def gamble(ctx):
     gambleresult = random.choice(["(Win)", "(Lose)"])
     gamblevalue = random.randint(1, 1000)
 
-    if gambleresult == "(Win)":
+    if ( worth <= 0 ):
+        emb = (discord.Embed(title="Sorry, you don't have any money.", description="You'll have to !work in order to gamble", colour=0xE80303))
+
+    elif gambleresult == "(Win)":
         worth = (worth + gamblevalue)
         cursor.execute("UPDATE users SET worth='%s' WHERE name='%s' " % (worth, gambleuser))
         db.commit()
-        # This cursor.execute can probably be removed. just leaving it                                                                                                                                       # until I'm more confident that things are working
+        # This cursor.execute can probably be removed. just leaving it                                                                                                                                       
+        # until I'm more confident that things are working
         # just use the existing worth value without pulling it from the db again
         cursor.execute("SELECT MAX(worth) FROM users WHERE name LIKE %s", "%" + (str(gambleuser, )) + "%")
         row = cursor.fetchone()
@@ -113,6 +117,29 @@ async def gamble(ctx):
         worth = row[0]
         emb = (discord.Embed(title=str(gambleuser) + " gambles and loses : $" + str(gamblevalue),
                          description="They now have: $ " + str(worth), colour=0xE80303))
+
+    await ctx.send(embed=emb)
+
+@bot.command(name='work',  help='make some gambling cash')
+async def work(ctx):
+    workuser = (ctx.message.author.name)
+    db = pymysql.connect( PB_DBH , PB_DBU , PB_DBP , PB_DBN )
+    cursor = db.cursor()
+    cursor.execute("SELECT MAX(worth) FROM users WHERE name LIKE %s", "%" + (str(workuser, )) + "%")
+    row = cursor.fetchone()
+    worth = row[0]
+    cursor.execute("SELECT * FROM work")
+    cursor.fetchall()
+    max = cursor.rowcount
+    jobnum = random.randint(1, max)
+    cursor.execute("SELECT task FROM work where ID like'" + str(jobnum) + "';")
+    jobtask = cursor.fetchone()
+    job = jobtask[0]
+    payout = random.randint(1, 500)
+    worth = (worth + payout)
+    cursor.execute("UPDATE users SET worth='%s' WHERE name='%s' " % (worth, workuser))
+    db.commit()
+    emb = (discord.Embed(title=str(workuser) + " " + str(job) + " and made $" + str(payout), description="They now have: $ " + str(worth), colour=0xE80303))
 
     await ctx.send(embed=emb)
 
