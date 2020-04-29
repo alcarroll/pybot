@@ -136,14 +136,15 @@ async def work(ctx):
     payout = random.randint(1, 500)
     if overtime == None:
         payout = payout
+        worth = (worth + payout)
         emb = (discord.Embed(title=str(workuser) + " " + str(job) + " and made $" + str(payout), 
             description="They now have: $ " + str(worth), colour=0xE80303))
     else:
         payout = payout + overtime
+        worth = (worth + payout)
         emb = (discord.Embed(title=str(workuser) + " " + str(job) + " and made $" + str(payout), 
             description="Including $" + str(overtime) + " from overtime!\nThey now have: $" + str(worth), colour=0xE80303))
     # Update DB and output    
-    worth = (worth + payout)
     cursor.execute("UPDATE users SET worth='%s' WHERE name='%s' " % (worth, workuser))
     db.commit()
     await ctx.send(embed=emb)
