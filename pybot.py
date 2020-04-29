@@ -81,48 +81,45 @@ async def eightball(ctx, *, ballInput):
 
 @bot.command(name='gamble', help='Try your luck!')
 async def gamble(ctx):
+    # Get username
     gambleuser = (ctx.message.author.name)
+    # DB connection, gather user's current worth
     db = pymysql.connect( PB_DBH , PB_DBU , PB_DBP , PB_DBN )
     cursor = db.cursor()
     cursor.execute("SELECT MAX(worth) FROM users WHERE name LIKE %s", "%" + (str(gambleuser, )) + "%")
     row = cursor.fetchone()
     worth = row[0]
+    # Determine win/lose and value
     gambleresult = random.choice(["(Win)", "(Lose)"])
     gamblevalue = random.randint(1, 1000)
 
+    # Make sure they have money to spend
     if ( worth <= 0 ):
         emb = (discord.Embed(title="Sorry, you don't have any money.", description="You'll have to !work in order to gamble", colour=0xE80303))
-
+    # Calculate win/loss and set emb    
     elif gambleresult == "(Win)":
         worth = (worth + gamblevalue)
-        cursor.execute("UPDATE users SET worth='%s' WHERE name='%s' " % (worth, gambleuser))
-        db.commit()
-        # This cursor.execute can probably be removed. just leaving it                                                                                                                                       
-        # until I'm more confident that things are working
-        # just use the existing worth value without pulling it from the db again
-        cursor.execute("SELECT MAX(worth) FROM users WHERE name LIKE %s", "%" + (str(gambleuser, )) + "%")
-        row = cursor.fetchone()
-        worth = row[0]
         emb = (discord.Embed(title=str(gambleuser) + " gambles and wins: $" + str(gamblevalue),
                          description="They now have: $" + str(worth), colour=0xE80303))
     else:
         worth = (worth - gamblevalue)
-        cursor.execute("UPDATE users SET worth='%s' WHERE name='%s' " % (worth, gambleuser))
-        db.commit()
-        # This cursor.execute can probably be removed. just leaving it 
-        # until I'm more confident that things are working
-        # just use the existing worth value without pulling it from the db again
-        cursor.execute("SELECT MAX(worth) FROM users WHERE name LIKE %s", "%" + (str(gambleuser, )) + "%")
-        row = cursor.fetchone()
-        worth = row[0]
         emb = (discord.Embed(title=str(gambleuser) + " gambles and loses : $" + str(gamblevalue),
-                         description="They now have: $ " + str(worth), colour=0xE80303))
-
+                         description="They now have: $" + str(worth), colour=0xE80303))
+    # Update DB and output    
+    cursor.execute("UPDATE users SET worth='%s' WHERE name='%s' " % (worth, gambleuser))
+    db.commit()
     await ctx.send(embed=emb)
 
 @bot.command(name='work',  help='make some gambling cash')
 async def work(ctx):
+    # Get username
     workuser = (ctx.message.author.name)
+    # Determine Overtime
+    if random.randint(1, 100) < 30:
+        overtime = (random.randint(20, 100))
+    else:
+        overtime = None
+    # DB connection, get job list, select job    
     db = pymysql.connect( PB_DBH , PB_DBU , PB_DBP , PB_DBN )
     cursor = db.cursor()
     cursor.execute("SELECT MAX(worth) FROM users WHERE name LIKE %s", "%" + (str(workuser, )) + "%")
@@ -135,15 +132,23 @@ async def work(ctx):
     cursor.execute("SELECT task FROM work where ID like'" + str(jobnum) + "';")
     jobtask = cursor.fetchone()
     job = jobtask[0]
+    # Determine payout and set emb
     payout = random.randint(1, 500)
+    if overtime == None:
+        payout = payout
+        emb = (discord.Embed(title=str(workuser) + " " + str(job) + " and made $" + str(payout), 
+            description="They now have: $ " + str(worth), colour=0xE80303))
+    else:
+        payout = payout + overtime
+        emb = (discord.Embed(title=str(workuser) + " " + str(job) + " and made $" + str(payout), 
+            description="Including $" + str(overtime) + " from overtime!\nThey now have: $" + str(worth), colour=0xE80303))
+    # Update DB and output    
     worth = (worth + payout)
     cursor.execute("UPDATE users SET worth='%s' WHERE name='%s' " % (worth, workuser))
     db.commit()
-    emb = (discord.Embed(title=str(workuser) + " " + str(job) + " and made $" + str(payout), description="They now have: $ " + str(worth), colour=0xE80303))
-
     await ctx.send(embed=emb)
 
-# This outputs the correct info but is terrible and needs to be improved
+# This outputs the correct info but is terrible and needs to be improved 
 @bot.command(name='networth', help='See how much cash everyone has')
 async def networth(ctx):
     db = pymysql.connect( PB_DBH , PB_DBU , PB_DBP , PB_DBN )
