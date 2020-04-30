@@ -161,7 +161,7 @@ async def networth(ctx):
 async def thief(ctx):
     thiefcaller = (ctx.message.author.name)
     #emb = (discord.Embed(title="OH NO! " + str(thiefcaller) + " envoked the bot thief!", colour=0xE80303))
-    await ctx.send("**OH NO!** " + str(thiefcaller) + " hired the bot thief!**")
+    await ctx.send("**OH NO! " + str(thiefcaller) + " hired the bot thief!**")
     callergains = 0
     db = pymysql.connect( PB_DBH , PB_DBU , PB_DBP , PB_DBN )
     cursor = db.cursor()
