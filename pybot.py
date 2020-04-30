@@ -13,8 +13,6 @@ PB_DBU = os.getenv('PYBOT_DB_USER')
 PB_DBP = os.getenv('PYBOT_DB_PASS')
 PB_DBN = os.getenv('PYBOT_DB_NAME')
 
-client = discord.Client()
-
 bot = commands.Bot(command_prefix='!')
 
 @bot.command(name='99', help='Responds with a random quote from Brooklyn 99.')
@@ -149,7 +147,7 @@ async def work(ctx):
     db.commit()
     await ctx.send(embed=emb)
 
-# This outputs the correct info but is terrible and needs to be improved 
+# Better now but still could use improvement
 @bot.command(name='networth', help='See how much cash everyone has')
 async def networth(ctx):
     db = pymysql.connect( PB_DBH , PB_DBU , PB_DBP , PB_DBN )
@@ -158,5 +156,36 @@ async def networth(ctx):
     userlist = cursor.fetchall()
     for row in userlist:
         await ctx.send(str(row[0]) + " has $" + str(row[1])) 
+
+@bot.command(name='thief', help='Hire the bot thief')
+async def thief(ctx):
+    thiefcaller = (ctx.message.author.name)
+    #emb = (discord.Embed(title="OH NO! " + str(thiefcaller) + " envoked the bot thief!", colour=0xE80303))
+    await ctx.send("**OH NO!** " + str(thiefcaller) + " hired the bot thief!**")
+    callergains = 0
+    db = pymysql.connect( PB_DBH , PB_DBU , PB_DBP , PB_DBN )
+    cursor = db.cursor()
+    cursor.execute("SELECT name,worth FROM users")
+    playerlist = cursor.fetchall()
+    for row in playerlist:
+        stolen = random.randint(1, 200)
+        lossworth = (row[1]) - stolen
+        gainworth = (row[1]) + stolen
+        target = (row[0])
+        if (target != thiefcaller):
+            cursor.execute("UPDATE users SET worth='%s' WHERE name='%s' " % (lossworth, target))
+            #cursor.execute("UPDATE users SET worth='%s' WHERE name='%s' " % (gainworth, thiefcaller))
+            db.commit()
+            await ctx.send("The bot theif stole $" + str(stolen) + " from " + str(target) + "!!")
+            callergains = callergains + stolen
+
+    thiefpay = random.randint(1, callergains)
+    callernet  = callergains - thiefpay
+    await ctx.send("**The bot thief stole $" + str(callergains) + " and charged " + str(thiefcaller) + " $" + str(thiefpay) + " for its work. " + str(thiefcaller) + " is now $" + str(callernet) + " richer!**")
+    cursor.execute("SELECT MAX(worth) FROM users WHERE name LIKE %s", "%" + (str(thiefcaller, )) + "%")
+    row = cursor.fetchone()
+    callerworth = row[0]
+    cursor.execute("UPDATE users SET worth='%s' WHERE name='%s' " % (callernet + callerworth, thiefcaller))
+    db.commit()
 
 bot.run(TOKEN)
