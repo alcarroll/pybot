@@ -1,7 +1,7 @@
 # bot.py
-import os, random, asyncio, discord, pymysql
+import os, random, asyncio, discord, pymysql, asyncio
 
-from discord.ext import commands
+from discord.ext import commands, tasks
 from dotenv import load_dotenv
 from discord.ext.commands import clean_content
 
@@ -157,7 +157,6 @@ async def networth(ctx):
     cursor.execute("SELECT name,worth FROM users")
     userlist = cursor.fetchall()
     for row in userlist:
-        emb = discord.Embed(title=(row[0]), description=(row[1]), colour=0xE80303)
-        await ctx.send(embed=emb)
+        await ctx.send(str(row[0]) + " has $" + str(row[1])) 
 
 bot.run(TOKEN)
