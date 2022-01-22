@@ -1,13 +1,8 @@
 # bot.py
-<<<<<<< HEAD
-import os, random, asyncio, discord, pymysql, pymysql.cursors
-
 from discord.ext import commands
-=======
 import os, random, asyncio, discord, pymysql, asyncio
 
 from discord.ext import commands, tasks
->>>>>>> bbf808e174a7a77bb68544bd4ade559fee2634c3
 from dotenv import load_dotenv
 from discord.ext.commands import clean_content
 
@@ -18,11 +13,8 @@ PB_DBH = os.getenv('PYBOT_DB_HOST')
 PB_DBU = os.getenv('PYBOT_DB_USER')
 PB_DBP = os.getenv('PYBOT_DB_PASS')
 PB_DBN = os.getenv('PYBOT_DB_NAME')
-<<<<<<< HEAD
 
 client = discord.Client()
-=======
->>>>>>> bbf808e174a7a77bb68544bd4ade559fee2634c3
 
 bot = commands.Bot(command_prefix='!')
 
@@ -93,11 +85,7 @@ async def gamble(ctx):
     # Get username
     gambleuser = (ctx.message.author.name)
     # DB connection, gather user's current worth
-<<<<<<< HEAD
     db = pymysql.connect( host=PB_DBH , user=PB_DBU , password=PB_DBP , database=PB_DBN )
-=======
-    db = pymysql.connect( PB_DBH , PB_DBU , PB_DBP , PB_DBN )
->>>>>>> bbf808e174a7a77bb68544bd4ade559fee2634c3
     cursor = db.cursor()
     cursor.execute("SELECT MAX(worth) FROM users WHERE name LIKE %s", "%" + (str(gambleuser, )) + "%")
     row = cursor.fetchone()
@@ -133,11 +121,7 @@ async def work(ctx):
     else:
         overtime = None
     # DB connection, get job list, select job    
-<<<<<<< HEAD
     db = pymysql.connect( host=PB_DBH , user=PB_DBU , password=PB_DBP , database=PB_DBN )
-=======
-    db = pymysql.connect( PB_DBH , PB_DBU , PB_DBP , PB_DBN )
->>>>>>> bbf808e174a7a77bb68544bd4ade559fee2634c3
     cursor = db.cursor()
     cursor.execute("SELECT MAX(worth) FROM users WHERE name LIKE %s", "%" + (str(workuser, )) + "%")
     row = cursor.fetchone()
@@ -154,45 +138,28 @@ async def work(ctx):
     if overtime == None:
         payout = payout
         worth = (worth + payout)
-<<<<<<< HEAD
-        emb = (discord.Embed(title=str(workuser) + " " + str(job) + " and earned $" + str(payout), 
-=======
         emb = (discord.Embed(title=str(workuser) + " " + str(job) + " and made $" + str(payout), 
->>>>>>> bbf808e174a7a77bb68544bd4ade559fee2634c3
             description="They now have: $ " + str(worth), colour=0xE80303))
     else:
         payout = payout + overtime
         worth = (worth + payout)
-<<<<<<< HEAD
-        emb = (discord.Embed(title=str(workuser) + " " + str(job) + " and earned $" + str(payout), 
-=======
         emb = (discord.Embed(title=str(workuser) + " " + str(job) + " and made $" + str(payout), 
->>>>>>> bbf808e174a7a77bb68544bd4ade559fee2634c3
             description="Including $" + str(overtime) + " from overtime!\nThey now have: $" + str(worth), colour=0xE80303))
     # Update DB and output    
     cursor.execute("UPDATE users SET worth='%s' WHERE name='%s' " % (worth, workuser))
     db.commit()
     await ctx.send(embed=emb)
 
-<<<<<<< HEAD
-# This outputs the correct info but is terrible and needs to be improved
-@bot.command(name='networth', help='See how much cash everyone has')
-async def networth(ctx):
-    db = pymysql.connect( host=PB_DBH , user=PB_DBU , password=PB_DBP , database=PB_DBN )
-=======
 # Better now but still could use improvement
 @bot.command(name='networth', help='See how much cash everyone has')
 async def networth(ctx):
-    db = pymysql.connect( PB_DBH , PB_DBU , PB_DBP , PB_DBN )
->>>>>>> bbf808e174a7a77bb68544bd4ade559fee2634c3
+    db = pymysql.connect( host=PB_DBH , user=PB_DBU , password=PB_DBP , database=PB_DBN )
     cursor = db.cursor()
     cursor.execute("SELECT name,worth FROM users")
     userlist = cursor.fetchall()
     for row in userlist:
-<<<<<<< HEAD
         emb = discord.Embed(title=(row[0]), description=(row[1]), colour=0xE80303)
         await ctx.send(embed=emb)
-=======
         await ctx.send(str(row[0]) + " has $" + str(row[1])) 
 
 @bot.command(name='thief', help='Hire the bot thief')
@@ -201,7 +168,7 @@ async def thief(ctx):
     #emb = (discord.Embed(title="OH NO! " + str(thiefcaller) + " envoked the bot thief!", colour=0xE80303))
     await ctx.send("**OH NO! " + str(thiefcaller) + " hired the bot thief!**")
     callergains = 0
-    db = pymysql.connect( PB_DBH , PB_DBU , PB_DBP , PB_DBN )
+    db = pymysql.connect( host=PB_DBH , user=PB_DBU , password=PB_DBP , database=PB_DBN )
     cursor = db.cursor()
     cursor.execute("SELECT name,worth FROM users")
     playerlist = cursor.fetchall()
@@ -225,6 +192,5 @@ async def thief(ctx):
     callerworth = row[0]
     cursor.execute("UPDATE users SET worth='%s' WHERE name='%s' " % (callernet + callerworth, thiefcaller))
     db.commit()
->>>>>>> bbf808e174a7a77bb68544bd4ade559fee2634c3
 
 bot.run(TOKEN)
