@@ -109,7 +109,6 @@ async def eightball(ctx, *, ballInput):
     emb.set_author(name='Magic 8 ball', icon_url='https://www.horoscope.com/images-US/games/game-magic-8-ball-no-text.png')
     await ctx.send(embed=emb)
 
-@bot.command(name='gamble', help='Try your luck!')
 async def gamble(ctx):
     # Get username
     gambleuser = (ctx.message.author.name)
