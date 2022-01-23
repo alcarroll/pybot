@@ -222,4 +222,22 @@ async def thief(ctx):
     cursor.execute("UPDATE users SET worth='%s' WHERE name='%s' " % (callernet + callerworth, thiefcaller))
     db.commit()
 
+@bot.command(name='fartroulette', help='Play Russian roulette, but with farts instead of bullets.')
+async def fart_roulette(ctx):
+    fart_roulette_results = [
+        'Click. Whew, you dodged that one.',
+        'Click. Your nose can live another day.',
+        'Click. Safe this time!',
+        'Click.',
+        (   
+            'PPPRRRRRRTTTTTFFFF!! OH THE HUMANITY!! '
+            'FARRRRRRRRRRRRRT!! COUGH COUGH COUGH GAG!'
+            'THHHHHHPPPPPPT! BOOOOOM! AAAAAAAAAAGH MAKE IT STOP!'
+        ),
+        'Click. Sniff Sniff. Oh, thank goodness.'
+    ]
+    
+    response = random.choice(fart_roulette_results)
+    await ctx.send(response)
+
 bot.run(TOKEN)
