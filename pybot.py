@@ -2,9 +2,9 @@
 from discord.ext import commands
 import os, random, asyncio, discord, pymysql, asyncio
 
-from discord.ext import commands, tasks
+from discord.ext import commands, tasks, commands
 from dotenv import load_dotenv
-from discord.ext.commands import clean_content
+#from discord.ext.commands import clean_content
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
@@ -36,7 +36,36 @@ async def nine_nine(ctx):
     response = random.choice(brooklyn_99_quotes)
     await ctx.send(response)
 
-    
+
+@bot.command(name='letterkenny', help='Responds with a random quote from Letterkenny.')
+async def letterkenny(ctx):
+    letterkenny_quotes = [
+        'It\'s almost not worth thinkin about.',
+        'Wish you weren\'t so awkward, bud',
+        'Do what you love and you\'ll never work a day in your life.',
+        'Pitter patter, let\'s get at\'er',
+        'And I suggest you let that one marinate!',
+        'You\’re made of spare parts, aren\’t ya, bud?',
+	'There\'s a special place in heaven for animal lovers, that\'s what I always say',
+        'I just don\'t think you have to pluralize those words',
+        'FUCKING. EMBARASSING!',
+        'FUCK YOU SHORESY',
+        'Oh, I got so much time for sushi.',
+        'Not my pig, not my farm.',
+        'Not my forte.',
+        'If I was a Dr. Seuss book, I’d be The Fat in the Hat.',
+        'I see the muscle shirt came today. Muscles coming tomorrow?',
+        'This eau de toilette is enchantingly refreshing on summer days like this.',
+        'Yeah. Oh, hey, look at you, ground',
+        'You wanna come to a super soft birthday party?',
+        'Vomit on your mom\’s spaghetti, or whatever that talking singer says.',
+        
+    ]
+
+    response = random.choice(letterkenny_quotes)
+    await ctx.send(response)
+
+
 @bot.command(name='roll_dice', help='Simulates rolling dice.')
 async def roll(ctx, number_of_dice: int, number_of_sides: int):
     dice = [
