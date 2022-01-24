@@ -223,7 +223,7 @@ async def thief(ctx):
 
 @bot.command(name='fartroulette', help='Play Russian roulette, but with farts instead of bullets.')
 async def fart_roulette(ctx):
-    choiceType = random.choice(["(fart)", "(fart)", "(fart)", "(fart)", "(fart)", "(safe)"])
+    choiceType = random.choice(["(fart)", "(safe)", "(safe)", "(safe)", "(safe)", "(safe)"])
     if choiceType == "(fart)":
         response = random.choice(["PFFFT! EGAD!",
                                     "PPPRRRRRRTTTTTFFFF!! OH THE HUMANITY!! ",
